@@ -82,7 +82,8 @@ for train_index, test_index in kf.split(appliedData):
         print(str(e))
 print("K-FOLD: ", k_fold)
 print("MÉDIA acuracia: ", np.mean(acuracia_list))
-
+print("VARIÂNCIA:", np.var(acuracia_list))
+print("DESVIO PADRÃO:" , np.std(acuracia_list))
 
 # esse codigo na minah máquina esta funcionando sem erro algum.
 # wisard sem kfold e imagem mental
