@@ -1,16 +1,17 @@
-import numpy as np
 import wisardpkg as wp
-import pandas as pd
+import numpy as np
 
-addressSize = 3     # number of addressing bits in the ram
-ignoreZero = False  # optional; causes the rams to ignore the address 0
+addressSize = 3    # number of addressing bits in the ram.
+minScore = 0.1  # min score of training process
+threshold = 10   # limit of training cycles by discriminator
+discriminatorLimit = 5    # limit of discriminators by clusters
 
-# False by default for performance reasons,
-# when True, WiSARD prints the progress of train() and classify()
-verbose = False
+# False by default for performance reasons
+# when enabled,e ClusWiSARD prints the progress of train() and classify()
+verbose = True
 
-wsd = wp.Wisard(addressSize, ignoreZero=ignoreZero, verbose=verbose)
-
+clus = wp.ClusWisard(addressSize, minScore, threshold,
+                     discriminatorLimit, verbose=True)
 
 X = [
     [1, 1, 1, 0, 0, 0, 0, 0],
@@ -19,7 +20,6 @@ X = [
     [0, 0, 0, 0, 0, 1, 1, 1]
 ]
 
-# load label data, which must be a string array
 y = [
     "cold",
     "cold",
@@ -27,17 +27,23 @@ y = [
     "hot"
 ]
 
-wsd.train(X, y)
+y2 = {
+    1: "cold",
+    2: "hot"
+}
 
-X = [
-    [1, 1, 1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 1, 1, 1]
-]
-
-# the output is a list of string, this represent the classes attributed to each input
-out = wsd.classify(X)
 breakpoint()
-for oneout in out:
-    print(oneout)
+# train using the input data
+clus.train(X, y2)
+
+# optionally you can train using arbitrary labels for the data
+# input some labels in a dict,
+# the keys must be integer indices indicating which input array the entry is associated to,
+# the values are the labels which must be strings
+
+# classify some data
+out = clus.classify(X)
+
+# the output of classify is a string list in the same sequence as the input
+for i, d in enumerate(X):
+    print(out[i], d)
