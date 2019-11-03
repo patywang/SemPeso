@@ -35,10 +35,10 @@ ignoreZero = False  # optional; causes the rams to ignore the address 0
 # False by default for performance reasons,
 # when True, WiSARD prints the progress of train() and classify()
 verbose = False
-
+k_fold = 2
 wsd = wp.Wisard(addressSize, ignoreZero=ignoreZero, verbose=verbose)
-kf = KFold(n_splits=2, shuffle=True)
-
+kf = KFold(n_splits=k_fold, shuffle=True)
+acuracia_list = []
 for train_index, test_index in kf.split(appliedData):
 
     train_based_values = appliedData.loc[train_index].values
@@ -63,12 +63,15 @@ for train_index, test_index in kf.split(appliedData):
             if(out[i] == label_test_based_list[i]):
                 numAcertos = numAcertos + 1
 
-        print('Acurácia:', numAcertos/len(label_train_based_list))
+        acuracia = numAcertos/len(label_train_based_list)
+        print('Acurácia:', acuracia)
+        acuracia_list.append(acuracia)
     # apanhando a imagem mental
-    # patterns = wsd.getMentalImages()
-    # print("Imagem Mental")
-    # for key in patterns:
-    #     print(key, patterns[key])
+        patterns = wsd.getMentalImages()
+        print("Imagem Mental:")
+        for key in patterns:
+            print(key, patterns[key])
+        print("Matriz de Confusão:")
         print(confusion_matrix(label_test_based_list, out))
 
 
@@ -77,6 +80,9 @@ for train_index, test_index in kf.split(appliedData):
 
     except Exception as e:
         print(str(e))
+print("K-FOLD: ", k_fold)
+print("MÉDIA acuracia: ", np.mean(acuracia_list))
+
 
 # esse codigo na minah máquina esta funcionando sem erro algum.
 # wisard sem kfold e imagem mental
