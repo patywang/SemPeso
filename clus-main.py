@@ -33,7 +33,7 @@ addressSize = 3    # number of addressing bits in the ram.
 minScore = 0.1  # min score of training process
 threshold = 10   # limit of training cycles by discriminator
 discriminatorLimit = 5    # limit of discriminators by clusters
-
+k_fold =  2
 # False by default for performance reasons
 # when enabled,e ClusWiSARD prints the progress of train() and classify()
 verbose = True
@@ -41,8 +41,8 @@ verbose = True
 clus = wp.ClusWisard(addressSize, minScore, threshold,
                      discriminatorLimit, verbose=True)
 
-kf = KFold(n_splits=2, shuffle=True)
-
+kf = KFold(n_splits=k_fold, shuffle=True)
+acuracia_list = []
 for train_index, test_index in kf.split(appliedData):
 
     train_based_values = appliedData.loc[train_index].values
@@ -66,13 +66,18 @@ for train_index, test_index in kf.split(appliedData):
         for i, d in enumerate(train_based_values_list):
             if(out[i] == label_test_based_list[i]):
                 numAcertos = numAcertos + 1
-        breakpoint()
-        print('Acurácia:', numAcertos/len(label_train_based_list))
-    # apanhando a imagem mental
-    # patterns = wsd.getMentalImages()
-    # print("Imagem Mental")
-    # for key in patterns:
-    #     print(key, patterns[key])
+
+        acuracia = numAcertos/len(label_train_based_list)
+        print('Acurácia:', acuracia)
+        acuracia_list.append(acuracia)
+        
+        patterns = clus.getMentalImages()
+        print("Imagem Mental")
+        for key in patterns:
+            cluster = patterns[key]
+            for index,discriminator in enumerate(cluster):
+                print(key, index, discriminator)
+        print("Matriz de confusão:")
         print(confusion_matrix(label_test_based_list, out))
 
 
@@ -80,9 +85,14 @@ for train_index, test_index in kf.split(appliedData):
 #     patterns = wsd.getMentalImages()
 
     except Exception as e:
-        breakpoint()
         print(str(e))
 
+print("ADDRES SIZE: ", addressSize)
+print("THRESHOLD: ", threshold)
+print("K-FOLD: ", k_fold)
+print("MÉDIA acuracia: ", np.mean(acuracia_list))
+print("VARIÂNCIA:", np.var(acuracia_list))
+print("DESVIO PADRÃO:" , np.std(acuracia_list))
 # esse codigo na minah máquina esta funcionando sem erro algum.
 # wisard sem kfold e imagem mental
 # try:
